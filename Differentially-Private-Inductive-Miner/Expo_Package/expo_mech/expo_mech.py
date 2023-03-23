@@ -1,41 +1,39 @@
-#TODO delete after evaluation-phase
-import sys
-
 import numpy as np
-
 from Expo_Package.cut_counting import __get_cutCount
-from Expo_Package import log_im_original, log_im_modified
+from Expo_Package import log_im_modified
 from pm4py.objects.process_tree import obj as pt
 
 k_best_cut = list()
 
+
 def __dp_tree(log, goalEpsilon, dfg, threshold, root, act_key, use_msd, remove_noise=False):
 
-    #get number of executes cuts in process strucre tree
+    # get number of executes cuts in process strucre tree
     global cutdict
     cutdict, numCuts = __get_cutCount(log, dfg, threshold, root, act_key, use_msd, remove_noise=False)
 
-    #get the epsilon we use in the exponential mechanism below
+    # get the epsilon we use in the exponential mechanism below
     global epsilon
     epsilon = goalEpsilon / numCuts
 
-    #create a differential private process tree and return it
+    # create a differential private process tree and return it
     tree = log_im_modified.__inductive_miner(log, dfg, threshold, root, act_key, use_msd, remove_noise=False)
 
-    #return the differential private process tree
+    # return the differential private process tree
     return tree
+
 
 def choose_cut():
 
     global cutdict, epsilon
     
-    #list of all cuts
+    # list of all cuts
     elements = list(cutdict.keys())
 
-    #the computed score of all cuts -> u(D, cut)
+    # the computed score of all cuts -> u(D, cut)
     scores = list(cutdict.values())
 
-    #list of exponents
+    # list of exponents
     exponents = [epsilon * score / 2 for score in scores]
 
     #if maximum score is greater than the maximum numpy can work with -> TODO: change if numpy can work with large values under windows

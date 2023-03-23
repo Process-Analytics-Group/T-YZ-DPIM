@@ -26,8 +26,8 @@ def __import_csv(file_path, epsilon):
     import pm4py
 
     # detect the delimiter of the.csv file
-    with open(file_path, "r") as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.readline())
+    with open(file_path, "r") as csv_file:
+        dialect = csv.Sniffer().sniff(csv_file.readline())
     # read .csv file
     event_log = pd.read_csv(file_path, sep=dialect.delimiter)
     # define dataframe of the EventLog

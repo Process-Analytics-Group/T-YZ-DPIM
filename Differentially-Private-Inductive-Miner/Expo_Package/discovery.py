@@ -271,12 +271,13 @@ def discover_process_tree_inductive(log: Union[EventLog, pd.DataFrame], epsilon,
     """
     if type(log) not in [pd.DataFrame, EventLog, EventStream]: raise Exception("the method can be applied only to a traditional event log!")
 
-    from Expo_Package.inductive import algorithm as inductive_miner #change this import to our modified one
+    from Expo_Package.inductive import algorithm as inductive_miner # change this import to our modified one
     parameters = get_properties(log)
     parameters[inductive_miner.Variants.IM_CLEAN.value.Parameters.NOISE_THRESHOLD] = noise_threshold
     
-    #go to the modiefied apply_tree function
+    # go to the modified apply_tree function
     return inductive_miner.apply_tree(log, epsilon, variant=inductive_miner.Variants.IM_CLEAN, parameters=parameters) 
+
 
 @deprecation.deprecated(deprecated_in='2.2.2', removed_in='2.4.0',
                         details='discover_tree_inductive is deprecated, use discover_process_tree_inductive')
