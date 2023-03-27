@@ -16,14 +16,12 @@
 """
 
 from enum import Enum
-
 import pm4py
 from pm4py.algo.discovery.dfg import algorithm as discover_dfg
 from pm4py.algo.discovery.inductive.variants.im_clean.cuts import sequence as sequence_cut, xor as xor_cut, \
     concurrency as concurrent_cut, loop as loop_cut
 from pm4py.algo.discovery.inductive.variants.im_clean.fall_throughs import activity_once_per_trace, activity_concurrent, \
     strict_tau_loop, tau_loop
-from pm4py.algo.discovery.inductive.variants.im_clean.utils import __filter_dfg_on_threshold, __flower
 from pm4py.algo.discovery.minimum_self_distance import algorithm as msd_algo
 from pm4py.algo.discovery.minimum_self_distance import utils as msdw_algo
 from pm4py.objects.dfg.utils import dfg_utils
@@ -52,7 +50,7 @@ numCuts = 0
 class Parameters(Enum):
     ACTIVITY_KEY = constants.PARAMETER_CONSTANT_ACTIVITY_KEY
 
-    def __get_cutCount(log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
+    def __get_cutCount(self, log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
 
         # for all traces count the occurens of each activity in a trace and save a list of the activities
         for trace in log:
@@ -65,22 +63,22 @@ class Parameters(Enum):
             # get the keys of the trace dict
             traceKeys = list(traceDict.keys())
 
-           # check if the list of the activities is already in the dict
+            # check if the list of the activities is already in the dict
             if tuple(revDuplicates) not in traceKeys:
                 traceDict.update({tuple(revDuplicates): 1})
             elif tuple(revDuplicates) in traceKeys:
                 traceDict[tuple(revDuplicates)] += 1
 
-        __cut_recursive(log, dfg, threshold, root, act_key, use_msd, remove_noise=False)
+        self.__cut_recursive(log, dfg, threshold, root, act_key, use_msd, remove_noise=False)
         return(cutDict, numCuts)
 
     # check cut for each element in event log
-    def __cut_recursive(log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
-        tree = __check_cut(log, dfg, threshold, root, act_key, use_msd, remove_noise)
+    def __cut_recursive(self, log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
+        tree = self.__check_cut(log, dfg, threshold, root, act_key, use_msd, remove_noise)
         return tree
 
     # check for cuts and increment the corresponding cut by one
-    def __check_cut(log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
+    def __check_cut(self, log, dfg, threshold, root, act_key, use_msd, remove_noise=False):
         global xorCount, sequenceCount, parallelCount, loopCount
         global numCuts
 
@@ -89,7 +87,7 @@ class Parameters(Enum):
             end_activities = get_ends.get_end_activities(log,
                                                          parameters={constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key})
 
-            dfg = __filter_dfg_on_threshold(dfg, end_activities, threshold)
+            dfg = self.__filter_dfg_on_threshold(dfg, end_activities, threshold)
 
         original_length = len(log)
         log = pm4py.filter_log(lambda t: len(t) > 0, log)
@@ -106,11 +104,11 @@ class Parameters(Enum):
             xorCount += 1
 
             # .append(activities)
-            count = __count_traces(activities)
+            count = self.__count_traces(activities)
 
             cutDict.update({'xor'+str(xorCount): count})
 
-            return __recursion(pt.ProcessTree(pt.Operator.XOR, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.XOR, root), threshold, act_key,
                                                  [EventLog(), log],
                                                  use_msd)
 
@@ -118,8 +116,8 @@ class Parameters(Enum):
             constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key})
         end_activities = get_ends.get_end_activities(log, parameters={constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key})
 
-        if __is_base_case_act(log, act_key) or __is_base_case_silent(log):
-            return __apply_base_case(log, root, act_key)
+        if self.__is_base_case_act(log, act_key) or self.__is_base_case_silent(log):
+            return self.__apply_base_case(log, root, act_key)
         pre, post = dfg_utils.get_transitive_relations(dfg, alphabet)
 
         # changes from here on
@@ -129,10 +127,10 @@ class Parameters(Enum):
 
             numCuts += 1
             sequenceCount += 1
-            count = __count_traces_seq(cut)
+            count = self.__count_traces_seq(cut)
             cutDict.update({'sequence'+str(sequenceCount): count})
 
-            return __recursion(pt.ProcessTree(pt.Operator.SEQUENCE, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.SEQUENCE, root), threshold, act_key,
                                                  sequence_cut.project(log, cut, act_key), use_msd)
 
         cut = xor_cut.detect(dfg, alphabet)
@@ -142,10 +140,10 @@ class Parameters(Enum):
 
             # if cut not in checkList:
             xorCount += 1
-            count = __count_traces(cut)
+            count = self.__count_traces(cut)
             cutDict.update({'xor'+str(xorCount): count})
 
-            return __recursion(pt.ProcessTree(pt.Operator.XOR, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.XOR, root), threshold, act_key,
                                                  xor_cut.project(log, cut, act_key), use_msd)
 
         cut = concurrent_cut.detect(dfg, alphabet, start_activities, end_activities,
@@ -156,10 +154,10 @@ class Parameters(Enum):
         if cut is not None:
             numCuts += 1
             parallelCount+= 1
-            count = __count_traces(cut)
+            count = self.__count_traces(cut)
             cutDict.update({'parallel'+str(parallelCount): count})
 
-            return __recursion(pt.ProcessTree(pt.Operator.PARALLEL, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.PARALLEL, root), threshold, act_key,
                                                  concurrent_cut.project(log, cut, act_key), use_msd)
 
         cut = loop_cut.detect(dfg, alphabet, start_activities, end_activities)
@@ -167,10 +165,10 @@ class Parameters(Enum):
         if cut is not None:
             numCuts += 1
             loopCount += 1
-            count = __count_traces(cut)
+            count = self.__count_traces(cut)
             cutDict.update({'loop'+str(loopCount): count})
 
-            return __recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
                                                  loop_cut.project(log, cut, act_key), use_msd)
 
         aopt = activity_once_per_trace.detect(log, alphabet, act_key)
@@ -188,7 +186,7 @@ class Parameters(Enum):
 
             cutDict.update({'parallel'+str(parallelCount): count})
             operator = pt.ProcessTree(operator=pt.Operator.PARALLEL, parent=root)
-            return __recursion(operator, threshold, act_key,
+            return self.__recursion(operator, threshold, act_key,
                                                  activity_once_per_trace.project(log, aopt, act_key), use_msd)
 
         act_conc = activity_concurrent.detect(log, alphabet, act_key, use_msd)
@@ -205,39 +203,39 @@ class Parameters(Enum):
                         count += v
 
             cutDict.update({'parallel'+str(parallelCount): count})
-            return __recursion(pt.ProcessTree(pt.Operator.PARALLEL, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.PARALLEL, root), threshold, act_key,
                                                  activity_concurrent.project(log, act_conc, act_key), use_msd)
 
         stl = strict_tau_loop.detect(log, start_activities, end_activities, act_key)
         if stl is not None:
-            return __recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
                                                  [stl, EventLog()],
                                                  use_msd)
 
         tl = tau_loop.detect(log, start_activities, act_key)
         if tl is not None:
-            return __recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
+            return self.__recursion(pt.ProcessTree(pt.Operator.LOOP, root), threshold, act_key,
                                                  [tl, EventLog()],
                                                  use_msd)
 
         if threshold > 0 and not remove_noise:
-            return __cut_recursive(log, dfg, threshold, root, act_key, use_msd, remove_noise=True)
+            return self.__cut_recursive(log, dfg, threshold, root, act_key, use_msd, remove_noise=True)
 
-        return __flower(alphabet, root)
+        return self.__flower(alphabet, root)
 
     # do recursion on the event-log, to count all cuts
-    def __recursion(operator, threshold, act_key, logs, use_msd):
-        if operator.operator != pt.Operator.LOOP:
+    def __recursion(self, threshold, act_key, logs, use_msd):
+        if self.operator != pt.Operator.LOOP:
             for log in logs:
-                __cut_recursive(log, discover_dfg.apply(log, parameters={
-                    constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, operator, act_key, use_msd)
+                self.__cut_recursive(log, discover_dfg.apply(log, parameters={
+                    constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, self, act_key, use_msd)
         else:
-            __cut_recursive(logs[0], discover_dfg.apply(logs[0], parameters={
-                constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, operator, act_key, use_msd)
+            self.__cut_recursive(logs[0], discover_dfg.apply(logs[0], parameters={
+                constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, self, act_key, use_msd)
             logs = logs[1:]
             if len(logs) == 1:
-                __cut_recursive(logs[0], discover_dfg.apply(logs[0], parameters={
-                    constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, operator, act_key, use_msd)
+                self.__cut_recursive(logs[0], discover_dfg.apply(logs[0], parameters={
+                    constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), threshold, self, act_key, use_msd)
 
     def __is_base_case_act(log, act_key):
         if len(list(filter(lambda t: len(t) == 1, log))) == len(log):

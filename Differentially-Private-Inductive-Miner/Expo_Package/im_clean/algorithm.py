@@ -1,4 +1,4 @@
-'''
+"""
     This file is part of PM4Py (More Info: https://pm4py.fit.fraunhofer.de).
 
     PM4Py is free software: you can redistribute it and/or modify
@@ -13,18 +13,11 @@
 
     You should have received a copy of the GNU General Public License
     along with PM4Py.  If not, see <https://www.gnu.org/licenses/>.
-'''
-from enum import Enum
-from typing import Union, Dict, Any, Optional, Tuple
-
-import pandas as pd
+"""
 
 from pm4py.algo.discovery.dfg import algorithm as discover_dfg
 from pm4py.algo.discovery.inductive.util import tree_consistency
 from pm4py.algo.discovery.inductive.variants.im_clean import dfg_im
-
-from Expo_Package.expo_mech import expo_mech # making the pst dp 
-
 from pm4py.algo.discovery.inductive.variants.im_clean.utils import DfgSaEaActCount
 from pm4py.objects.conversion.log import converter as log_converter
 from pm4py.objects.conversion.process_tree import converter as tree_converter
@@ -34,7 +27,10 @@ from pm4py.objects.process_tree.obj import ProcessTree
 from pm4py.objects.process_tree.utils import generic
 from pm4py.util import constants, exec_utils, xes_constants
 from pm4py.util import variants_util
-from pm4py.objects.log.util import filtering_utils
+from enum import Enum
+from typing import Union, Dict, Any, Optional, Tuple
+import pandas as pd
+from Expo_Package.expo_mech import expo_mech
 
 
 class Parameters(Enum):
@@ -92,15 +88,12 @@ def apply_tree(event_log: Union[pd.DataFrame, EventLog, EventStream], epsilon,
 
     threshold = exec_utils.get_param_value(Parameters.NOISE_THRESHOLD, parameters, 0.0)
 
-    #keep one trace per variant; more performant TODO:gucken das wir das nutzten für performance
-    #log = filtering_utils.keep_one_trace_per_variant(log, parameters=parameters)
-
-    #create a DP-PST and return this tree
+    # create a DP-PST and return this tree
     tree = expo_mech.__dp_tree(event_log, epsilon, discover_dfg.apply(event_log, parameters=parameters),
-                             threshold, None,
-                             act_key, exec_utils.get_param_value(Parameters.USE_MSD_PARALLEL_CUT, parameters, True))
+                               threshold, None, act_key, exec_utils.get_param_value(Parameters.USE_MSD_PARALLEL_CUT,
+                                                                                    parameters, True))
 
-    #normalize the tree
+    # normalize the tree
     tree_consistency.fix_parent_pointers(tree)
     tree = generic.fold(tree)
     generic.tree_sort(tree)
@@ -124,10 +117,10 @@ def apply_tree_dfg(dfg: Dict[Tuple[str, str], int], start_activities: Dict[str, 
     if parameters is None:
         parameters = {}
 
-    dfg_sa_ea_actcount = DfgSaEaActCount(dfg, start_activities, end_activities, activities)
+    dfg_sa_ea_act_count = DfgSaEaActCount(dfg, start_activities, end_activities, activities)
     threshold = exec_utils.get_param_value(Parameters.NOISE_THRESHOLD, parameters, 0.0)
 
-    tree = dfg_im.__imd(dfg_sa_ea_actcount, threshold, None)
+    tree = dfg_im.__imd(dfg_sa_ea_act_count, threshold, None)
 
     tree_consistency.fix_parent_pointers(tree)
     tree = generic.fold(tree)

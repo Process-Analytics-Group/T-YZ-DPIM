@@ -15,13 +15,12 @@
     along with PM4Py.  If not, see <https://www.gnu.org/licenses/>.
 """
 from enum import Enum
-
 import pm4py
 from pm4py.algo.discovery.dfg import algorithm as discover_dfg
 from pm4py.algo.discovery.inductive.variants.im_clean.cuts import sequence as sequence_cut, xor as xor_cut, \
     concurrency as concurrent_cut, loop as loop_cut
-from pm4py.algo.discovery.inductive.variants.im_clean.fall_throughs import activity_once_per_trace, activity_concurrent, \
-    strict_tau_loop, tau_loop
+from pm4py.algo.discovery.inductive.variants.im_clean.fall_throughs import activity_once_per_trace, \
+    activity_concurrent, strict_tau_loop, tau_loop
 from pm4py.algo.discovery.inductive.variants.im_clean.utils import __filter_dfg_on_threshold, __flower
 from pm4py.algo.discovery.minimum_self_distance import algorithm as msd_algo
 from pm4py.algo.discovery.minimum_self_distance import utils as msdw_algo
@@ -32,7 +31,6 @@ from pm4py.objects.process_tree import obj as pt
 from pm4py.statistics.end_activities.log import get as get_ends
 from pm4py.statistics.start_activities.log import get as get_starters
 from pm4py.util import constants
-
 from Expo_Package.expo_mech import expo_mech
 
 
@@ -59,8 +57,8 @@ def __inductive_miner_internal(log, dfg, threshold, root, act_key, use_msd, remo
 
     # revised EMPTY SPACES
     if original_length - len(log) > original_length * threshold:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              [EventLog(), log],
                                              use_msd)
 
@@ -73,39 +71,39 @@ def __inductive_miner_internal(log, dfg, threshold, root, act_key, use_msd, remo
     pre, post = dfg_utils.get_transitive_relations(dfg, alphabet)
     cut = sequence_cut.detect(alphabet, pre, post)
     if cut is not None:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              sequence_cut.project(log, cut, act_key), use_msd)
     cut = xor_cut.detect(dfg, alphabet)
     if cut is not None:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              xor_cut.project(log, cut, act_key), use_msd)
     cut = concurrent_cut.detect(dfg, alphabet, start_activities, end_activities,
                                 msd=msdw_algo.derive_msd_witnesses(log, msd_algo.apply(log, parameters={
                                     constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}), parameters={
                                     constants.PARAMETER_CONSTANT_ACTIVITY_KEY: act_key}) if use_msd else None)
     if cut is not None:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              concurrent_cut.project(log, cut, act_key), use_msd)
     cut = loop_cut.detect(dfg, alphabet, start_activities, end_activities)
     if cut is not None:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              loop_cut.project(log, cut, act_key), use_msd)
 
     aopt = activity_once_per_trace.detect(log, alphabet, act_key)
     if aopt is not None:
-        choosed_cut = expo_mech.choose_cut()
-        operator = pt.ProcessTree(operator=choosed_cut, parent=root)
+        chosen_cut = expo_mech.choose_cut()
+        operator = pt.ProcessTree(operator=chosen_cut, parent=root)
         operator.children.append(pt.ProcessTree(operator=None, parent=operator, label=aopt))
         return __add_operator_recursive_logs(operator, threshold, act_key,
                                              activity_once_per_trace.project(log, aopt, act_key), use_msd)
     act_conc = activity_concurrent.detect(log, alphabet, act_key, use_msd)
     if act_conc is not None:
-        choosed_cut = expo_mech.choose_cut()
-        return __add_operator_recursive_logs(pt.ProcessTree(choosed_cut, root), threshold, act_key,
+        chosen_cut = expo_mech.choose_cut()
+        return __add_operator_recursive_logs(pt.ProcessTree(chosen_cut, root), threshold, act_key,
                                              activity_concurrent.project(log, act_conc, act_key), use_msd)
     stl = strict_tau_loop.detect(log, start_activities, end_activities, act_key)
     if stl is not None:

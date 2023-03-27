@@ -1,4 +1,4 @@
-'''
+"""
     This file is part of PM4Py (More Info: https://pm4py.fit.fraunhofer.de).
 
     PM4Py is free software: you can redistribute it and/or modify
@@ -13,14 +13,12 @@
 
     You should have received a copy of the GNU General Public License
     along with PM4Py.  If not, see <https://www.gnu.org/licenses/>.
-'''
+"""
 import warnings
 from typing import Tuple, Union, List, Dict, Any
-
 import deprecation
 import pandas as pd
 from pandas import DataFrame
-
 from pm4py.objects.bpmn.obj import BPMN
 from pm4py.objects.heuristics_net.obj import HeuristicsNet
 from pm4py.objects.log.obj import EventLog
