@@ -1,5 +1,7 @@
 # Differentially Private Inductive Miner
-    {Short description will follow}
+    The DPIM is a process discovery algorithm used for process mining. It requires an event log (.CSV or .XES) and a
+    nummerical epsilon value for differential privacy as input and creates a differentially private
+    Refined Process Structure Tree (RSPT).
 
 
 ## Authors
@@ -14,21 +16,17 @@
 
 
 ## How to get started
-    {Short description will follow}
-
+    To start, simply run the file DP-Inductive-Miner.py found in Differentially-Private-Inductive-Miner\. You will be
+    prompted for the location of an event log file and for an epsilon value.
 
 
 ## Structure of this repository
-- ### Validation Data Sets
-  - Event Logs can be found in folders \Event-Logs\ ...
+- ### Event Logs
+  - The event logs used throughout the paper can be found in folders \Event-Logs\.
+- ### Evaluation Results
+  - All data used for evaluation can be found in \Evaluations-Results\[specific metric here]\ with .TXT files for
+    various epsilon values.
 - ### Aggregated Results
-  - MS Excel file containing all results can be found in \ ...
-
-
-# Head Line 1
-## Head Line 2
-### Head Line 3
-**Bold Text**
-- Indented Text 1
-  - Indented Text 2
-    - Indented Text 3 ff.
+  - An MS Excel file containing all results can be found in \Evaluations-Results\Aggregated Values\DPIM Data.xlsx.
+    These are the values our figures are based on.
+  
